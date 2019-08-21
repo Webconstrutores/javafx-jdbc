@@ -2,6 +2,8 @@ package model.services;
 
 import java.util.List;
 
+import org.graalvm.compiler.nodes.DeoptimizingNode.DeoptAfter;
+
 import model.dao.DaoFactory;
 import model.dao.DepartmentDao;
 import model.entities.Department;
@@ -12,6 +14,14 @@ public class DepartmentService {
 	
 	public List<Department> findAll() {
 		return dao.findAll();
+	}
+	
+	public void saveOrUpdate(Department dep) {
+		if(dep.getId() == null) {
+			dao.insert(dep);
+		} else {
+			dao.update(dep);
+		}
 	}
 	
 }
