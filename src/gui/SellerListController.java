@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +17,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -24,6 +27,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
 import model.services.SellerService;
@@ -102,28 +107,28 @@ public class SellerListController implements Initializable, DataChangeListener {
 	}
 
 	private void createDialogForm(Seller dep, String absolutePath, Stage parentStage) {
-//		try {
-//			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutePath));
-//			Pane pane = loader.load();
-//
-//			SellerFormController controller = loader.getController();
-//			controller.setSeller(dep);
-//			controller.setSellerService(new SellerService());
-//			controller.subscribeDataChangeListener(this);
-//			controller.updateFormData();
-//
-//			Stage dialogStage = new Stage();
-//			dialogStage.setTitle("Enter department data:");
-//			dialogStage.setScene(new Scene(pane));
-//			dialogStage.setResizable(false);
-//			dialogStage.initOwner(parentStage);
-//			dialogStage.initModality(Modality.WINDOW_MODAL);
-//			dialogStage.showAndWait();
-//			dialogStage.focusedProperty();
-//
-//		} catch (IOException e) {
-//			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
-//		}
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutePath));
+			Pane pane = loader.load();
+
+			SellerFormController controller = loader.getController();
+			controller.setSeller(dep);
+			controller.setSellerService(new SellerService());
+			controller.subscribeDataChangeListener(this);
+			controller.updateFormData();
+
+			Stage dialogStage = new Stage();
+			dialogStage.setTitle("Enter seller data:");
+			dialogStage.setScene(new Scene(pane));
+			dialogStage.setResizable(false);
+			dialogStage.initOwner(parentStage);
+			dialogStage.initModality(Modality.WINDOW_MODAL);
+			dialogStage.showAndWait();
+			dialogStage.focusedProperty();
+
+		} catch (IOException e) {
+			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
+		}
 	}
 
 	@Override
@@ -131,7 +136,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 		updateTableView();
 	}
 	
-	private void removeEntity(Seller department) {
+	private void removeEntity(Seller seller) {
 		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
 		
 		if(result.get() == ButtonType.OK) {
@@ -140,7 +145,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 				throw new IllegalStateException("Service was null");
 			}
 			try {
-				service.remove(department);
+				service.remove(seller);
 				updateTableView();
 			} catch(DbException e) {
 				Alerts.showAlert("Error removing aboject", null, e.getMessage(), AlertType.ERROR);
@@ -154,15 +159,15 @@ public class SellerListController implements Initializable, DataChangeListener {
 			private final Button button = new Button("e");
 
 			@Override
-			protected void updateItem(Seller department, boolean empty) {
-				super.updateItem(department, empty);
-				if (department == null) {
+			protected void updateItem(Seller seller, boolean empty) {
+				super.updateItem(seller, empty);
+				if (seller == null) {
 					setGraphic(null);
 					return;
 				}
 				setGraphic(button);
 				button.setOnAction(
-						event -> createDialogForm(department, "/gui/SellerForm.fxml", Utils.currentStage(event)));
+						event -> createDialogForm(seller, "/gui/SellerForm.fxml", Utils.currentStage(event)));
 			}
 		});
 	}
@@ -173,14 +178,14 @@ public class SellerListController implements Initializable, DataChangeListener {
 			private final Button button = new Button("-");
 
 			@Override
-			protected void updateItem(Seller department, boolean empty) {
-				super.updateItem(department, empty);
-				if (department == null) {
+			protected void updateItem(Seller seller, boolean empty) {
+				super.updateItem(seller, empty);
+				if (seller == null) {
 					setGraphic(null);
 					return;
 				}
 				setGraphic(button);
-				button.setOnAction(event -> removeEntity(department));
+				button.setOnAction(event -> removeEntity(seller));
 			}
 		});
 	}
